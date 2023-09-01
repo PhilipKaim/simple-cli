@@ -12,7 +12,7 @@ builds:
     main: ./simple.go
     env:
       - CGO_ENABLED=0
-    goos: // enabling Go OS for Linux, windows and darwin
+    goos:
       - linux
       - darwin
     goarch:
@@ -54,18 +54,6 @@ brews:
     dependencies:
       - name: git
       - name: go
-
-archives:
-  - #Replacements for GOOS and GOARCH in the archive name
-    replacements:
-      darwin: macOS
-      linux: Linux
-      386: i386
-      amd64: x86_64
-
-    files:
-      - LICENSE
-      - README.md
 
 checksum:
   name_template: 'checksums.txt'
