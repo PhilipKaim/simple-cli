@@ -1,44 +1,80 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
+# This is an example .goreleaser.yml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: simple-cli
+
 before:
   hooks:
     # You may remove this if you don't use go modules.
-    - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
+    - go mod download
+
 builds:
-  - env:
+  - # Build macOS, Linux and Windows versions
+    main: ./simple.go
+    env:
       - CGO_ENABLED=0
-    goos:
+    goos: // enabling Go OS for Linux, windows and darwin
       - linux
-      # - windows
       - darwin
+    goarch:
+      - amd64
+      - arm64
+    targets:
+      - linux_amd64
+      - darwin_amd64
+      - darwin_arm64
+    ldflags:
+      - -s -w
+
+# .goreleaser.yml
+brews:
+  - # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: philip kaim
+      name: cli
+
+    name: shedsuite-simple-cli
+
+    homepage: https://github.com/PhilipKaim/simple-cli
+
+    folder: Formula
+
+    # Caveats for the user of your binary.
+    # Default is empty.
+    caveats: ""
+
+    # Your app's description.
+    # Default is empty.
+    description: ""
+
+    # SPDX identifier of your app's license.
+    # Default is empty.
+    license: "MIT"
+
+    # Packages your package depends on.
+    dependencies:
+      - name: git
+      - name: go
 
 archives:
-  - format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of uname.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
-    # use zip for windows archives
-    format_overrides:
-      - goos: windows
-        format: zip
+  - #Replacements for GOOS and GOARCH in the archive name
+    replacements:
+      darwin: macOS
+      linux: Linux
+      386: i386
+      amd64: x86_64
+
+    files:
+      - LICENSE
+      - README.md
+
 checksum:
-  name_template: "checksums.txt"
+  name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
-# The lines beneath this are called `modelines`. See `:help modeline`
-# Feel free to remove those if you don't want/use them.
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
-# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+      - '^docs:'
+      - '^test:'
+      - "^*.md:"
